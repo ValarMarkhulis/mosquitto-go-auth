@@ -32,6 +32,7 @@ type jwtChecker interface {
 
 const (
 	remoteMode        = "remote"
+	remoteJWKMode     = "remote_jwk"
 	localMode         = "local"
 	jsMode            = "js"
 	filesMode         = "files"
@@ -82,6 +83,9 @@ func NewJWT(authOpts map[string]string, logLevel log.Level, hasher hashing.HashC
 	case remoteMode:
 		jwt.mode = remoteMode
 		checker, err = NewRemoteJWTChecker(authOpts, options, version)
+	case remoteJWKMode:
+		jwt.mode = remoteJWKMode
+		checker, err = NewJWKRemoteJWTChecker(authOpts, options, version)
 	case filesMode:
 		jwt.mode = filesMode
 		checker, err = NewFilesJWTChecker(authOpts, logLevel, hasher, options)

@@ -1739,3 +1739,41 @@ func TestJWTHttpTimeout(t *testing.T) {
 	})
 
 }
+
+type Token struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   int    `json:"expires_in"`
+}
+
+func TestJWK(t *testing.T) {
+
+	token := "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkJUVFk3TzFHQmQ0MDZCRDYyU0wzTSJ9.eyJpc3MiOiJodHRwczovL2Rldi1pc2Vmbmt5c2gzNXByZmUxLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJja3JmVHR3YmtGeEdtdzNPUTdOM1VjSFg2NFdmSEU4bkBjbGllbnRzIiwiYXVkIjoiand0LXRlc3RpbmctYXBpIiwiaWF0IjoxNzE4NDczNTM4LCJleHAiOjE3MTg1NTk5MzgsImd0eSI6ImNsaWVudC1jcmVkZW50aWFscyIsImF6cCI6ImNrcmZUdHdia0Z4R213M09RN04zVWNIWDY0V2ZIRThuIn0.AMyGle1imOmCAEJjEN4aIms_kStvPy1I1pG3snr4KfVqgZ0vcF5OeoTSHB4uEqWvukB71mN1K40UZeibMeznZY67m802Gr-Vg_g6Xhf1VtsmyLueyVRseSTxKhrmv14Qni5U-u_1QNrJSLKpQjrQAtdfH9HyHvRU3BWPQ82Shr1Ey0KQvN7ojZdRFuHW_LHYHO99XzcnGVZ5bfOmlEgDaAn_sJH6vUrf71jSJs3yPXpPRoHZHxOi7qQSDvCYLlD3FeGzOFF55Hryx_nf3RQ9l0CvG2QYcjFzi8pAHv3sK-RdFBtlt-EjltFamXbVVRcTemRAEYfLTZSx930CGKA6AQ"
+
+	version := "2.0.0"
+
+	authOpts := make(map[string]string)
+	authOpts["jwt_mode"] = "remote_jwk"
+	authOpts["jwt_params_mode"] = "json"
+	authOpts["jwt_response_mode"] = "json"
+	authOpts["jwt_host"] = "https://dev-isefnkysh35prfe1.us.auth0.com/" //strings.Replace("https://dev-isefnkysh35prfe1.us.auth0.com", "https://", "", -1)
+	//authOpts["jwt_port"] = "3010"
+	authOpts["jwt_jwk_uri"] = "https://dev-isefnkysh35prfe1.us.auth0.com/"
+	authOpts["jwt_jwk_audience"] = "jwt-testing-api"
+	// https://dev-isefnkysh35prfe1.us.auth0.com/.well-known/jwks.json
+
+	Convey("Given correct options an http backend instance should be returned", t, func() {
+		hb, err := NewJWT(authOpts, log.DebugLevel, hashing.NewHasher(authOpts, ""), version)
+		So(err, ShouldBeNil)
+		So(hb.GetName(), ShouldEqual, "JWT remote_jwk")
+
+		Convey("Given correct password/username, get user should return true", func() {
+
+			authenticated, err := hb.GetUser(token, "", "")
+			So(err, ShouldBeNil)
+			So(authenticated, ShouldBeTrue)
+
+		})
+	})
+
+}
